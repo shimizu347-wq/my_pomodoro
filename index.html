@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chic Pomodoro Crystal</title>
+    <title>Chic Pomodoro Crystal v2</title>
     <style>
         :root {
             --bg-color: #F8F3F1;
             --card-bg: #FFFFFF;
-            --main-color: #D4A5A5;     /* くすみピンク */
-            --accent-color: #D98880;   /* テラコッタ */
+            --main-color: #D4A5A5;
+            --accent-color: #D98880;
             --text-color: #4D4D4D;
-            --gold-color: #C2A88A;     /* マットゴールド */
+            --gold-color: #C2A88A;
             --shadow: 0 15px 35px rgba(212, 165, 165, 0.2);
         }
 
@@ -122,6 +122,16 @@
             color: #999;
         }
 
+        .sound-test {
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: var(--gold-color);
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
         .progress-bar-container {
             position: absolute;
             bottom: 0;
@@ -158,6 +168,8 @@
             <button class="main-btn reset" onclick="resetTimer()">Reset</button>
         </div>
 
+        <button class="sound-test" onclick="initAndPlayTest()">♪ Sound Test</button>
+
         <div class="progress-bar-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
@@ -165,28 +177,43 @@
 </div>
 
 <script>
-    /* --- 音声合成設定 --- */
     let audioCtx = null;
 
+    // 音源の初期化と再生
     function playCrystalSound() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C major arpeggio
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
         const now = audioCtx.currentTime;
+
         notes.forEach((freq, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
+            
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, now + i * 0.1);
-            gain.gain.setValueAtTime(0.2, now + i * 0.1);
+            
+            gain.gain.setValueAtTime(0.4, now + i * 0.1); // 音量を少し上げました
             gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.1 + 1.5);
+            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
+            
             osc.start(now + i * 0.1);
             osc.stop(now + i * 0.1 + 1.5);
         });
     }
 
-    /* --- タイマーロジック --- */
+    // テストボタン用
+    function initAndPlayTest() {
+        playCrystalSound();
+    }
+
     let workMinutes = 25;
     let breakMinutes = 5;
     let timeLeft = workMinutes * 60;
@@ -209,7 +236,7 @@
 
     function setTimer(w, b, btn) {
         if (timerId) {
-            if(!confirm("進行中のタイマーをリセットして時間を変更しますか？")) return;
+            if(!confirm("進行中のタイマーをリセットしますか？")) return;
             resetTimer();
         }
         workMinutes = w;
@@ -225,6 +252,7 @@
     }
 
     function toggleTimer() {
+        // Startボタンを押した瞬間に音響機能をONにする
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -247,26 +275,31 @@
     function completeCycle() {
         clearInterval(timerId);
         timerId = null;
+        
+        // 先に音を鳴らす
         playCrystalSound();
 
-        if (!isBreak) {
-            isBreak = true;
-            timeLeft = breakMinutes * 60;
-            totalTime = breakMinutes * 60;
-            statusLabel.innerText = "Short Break";
-            statusLabel.style.color = "#88A0A8";
-            setTimeout(() => alert("Work finished! クリスタルな休憩を。"), 100);
-        } else {
-            isBreak = false;
-            timeLeft = workMinutes * 60;
-            totalTime = workMinutes * 60;
-            statusLabel.innerText = "Work Focus";
-            statusLabel.style.color = "var(--accent-color)";
-            setTimeout(() => alert("Break finished! 作業を再開しましょう。"), 100);
-        }
-        startBtn.innerText = 'Start';
-        startBtn.style.backgroundColor = 'var(--main-color)';
-        updateDisplay();
+        // 0.5秒待ってから通知を出す（音が消されないように）
+        setTimeout(() => {
+            if (!isBreak) {
+                alert("Work finished! クリスタルな休憩を。");
+                isBreak = true;
+                timeLeft = breakMinutes * 60;
+                totalTime = breakMinutes * 60;
+                statusLabel.innerText = "Short Break";
+                statusLabel.style.color = "#88A0A8";
+            } else {
+                alert("Break finished! 作業を再開しましょう。");
+                isBreak = false;
+                timeLeft = workMinutes * 60;
+                totalTime = workMinutes * 60;
+                statusLabel.innerText = "Work Focus";
+                statusLabel.style.color = "var(--accent-color)";
+            }
+            startBtn.innerText = 'Start';
+            startBtn.style.backgroundColor = 'var(--main-color)';
+            updateDisplay();
+        }, 500);
     }
 
     function resetTimer() {
