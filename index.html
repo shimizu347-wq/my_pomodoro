@@ -171,118 +171,117 @@
 </div>
 
 <script>
-    let workMinutes = 25;
-    let breakMinutes = 5;
-    let timeLeft = workMinutes * 60;
-    let totalTime = workMinutes * 60;
-    let timerId = null;
-    let isBreak = false;
+/* --- 音声合成エンジン（クリスタル風） --- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    const display = document.getElementById('display');
-    const startBtn = document.getElementById('startBtn');
-    const progressBar = document.getElementById('progressBar');
-    const statusLabel = document.getElementById('statusLabel');
+function playCrystalSound() {
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C-E-G-C-E の和音
+    const now = audioCtx.currentTime;
 
-    function updateDisplay() {
-        const mins = Math.floor(timeLeft / 60);
-        const secs = timeLeft % 60;
-        display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        const progressPercent = (timeLeft / totalTime) * 100;
-        progressBar.style.width = `${progressPercent}%`;
-    }
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine'; // 透明感のある正弦波
+        osc.frequency.setValueAtTime(freq, now + i * 0.1); // 0.1秒ずつずらしてアルペジオに
+        
+        gain.gain.setValueAtTime(0.2, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.1 + 1.5); // 残響を残して消える
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + i * 0.1);
+        osc.stop(now + i * 0.1 + 1.5);
+    });
+}
 
-    // 時間設定ボタンの処理
-    function setTimer(w, b, btn) {
-        if (timerId) {
-            if(!confirm("進行中のタイマーをリセットして時間を変更しますか？")) return;
-            pauseTimer();
-        }
-        
-        workMinutes = w;
-        breakMinutes = b;
-        isBreak = false;
-        timeLeft = workMinutes * 60;
-        totalTime = workMinutes * 60;
-        
-        // UI更新
-        statusLabel.innerText = "Work Focus";
-        statusLabel.style.color = "var(--accent-color)";
-        
-        // ボタンの活性状態
-        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
+/* --- タイマーロジック（更新版） --- */
+let workMinutes = 25;
+let breakMinutes = 5;
+let timeLeft = workMinutes * 60;
+let totalTime = workMinutes * 60;
+let timerId = null;
+let isBreak = false;
+
+const display = document.getElementById('display');
+const startBtn = document.getElementById('startBtn');
+const progressBar = document.getElementById('progressBar');
+const statusLabel = document.getElementById('statusLabel');
+
+function updateDisplay() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const progressPercent = (timeLeft / totalTime) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+}
+
+function toggleTimer() {
+    if (audioCtx.state === 'suspended') audioCtx.resume(); // ブラウザの制限解除
+    if (timerId) pauseTimer();
+    else startTimer();
+}
+
+function startTimer() {
+    startBtn.innerText = 'Pause';
+    startBtn.style.backgroundColor = 'var(--accent-color)';
+    timerId = setInterval(() => {
+        timeLeft--;
         updateDisplay();
-    }
+        if (timeLeft <= 0) completeCycle();
+    }, 1000);
+}
 
-    function toggleTimer() {
-        if (timerId) {
-            pauseTimer();
-        } else {
-            startTimer();
-        }
-    }
+function pauseTimer() {
+    clearInterval(timerId);
+    timerId = null;
+    startBtn.innerText = 'Resume';
+    startBtn.style.backgroundColor = 'var(--main-color)';
+}
 
-    function startTimer() {
-        startBtn.innerText = 'Pause';
-        startBtn.style.backgroundColor = 'var(--accent-color)';
-        timerId = setInterval(() => {
-            timeLeft--;
-            updateDisplay();
-            if (timeLeft <= 0) {
-                completeCycle();
-            }
-        }, 1000);
-    }
+function completeCycle() {
+    clearInterval(timerId);
+    timerId = null;
+    
+    // 休憩に入る瞬間に音を鳴らす！
+    playCrystalSound();
 
-    function pauseTimer() {
-        clearInterval(timerId);
-        timerId = null;
-        startBtn.innerText = 'Resume';
-        startBtn.style.backgroundColor = 'var(--main-color)';
-    }
-
-    function completeCycle() {
-        clearInterval(timerId);
-        timerId = null;
-        
-        if (!isBreak) {
-            // 休憩へ
-            alert("お疲れ様です！休憩に入りましょう。");
-            isBreak = true;
-            timeLeft = breakMinutes * 60;
-            totalTime = breakMinutes * 60;
-            statusLabel.innerText = "Short Break";
-            statusLabel.style.color = "#88A0A8"; // 休憩用は少し落ち着いた青緑系に
-        } else {
-            // 作業へ
-            alert("リフレッシュできましたか？作業を再開しましょう！");
-            isBreak = false;
-            timeLeft = workMinutes * 60;
-            totalTime = workMinutes * 60;
-            statusLabel.innerText = "Work Focus";
-            statusLabel.style.color = "var(--accent-color)";
-        }
-        
-        startBtn.innerText = 'Start';
-        startBtn.style.backgroundColor = 'var(--main-color)';
-        updateDisplay();
-    }
-
-    function resetTimer() {
-        clearInterval(timerId);
-        timerId = null;
+    if (!isBreak) {
+        alert("Work finished! クリスタルな休憩を。");
+        isBreak = true;
+        timeLeft = breakMinutes * 60;
+        totalTime = breakMinutes * 60;
+        statusLabel.innerText = "Short Break";
+        statusLabel.style.color = "#88A0A8";
+    } else {
+        alert("Break finished! 集中を再開しましょう。");
         isBreak = false;
         timeLeft = workMinutes * 60;
         totalTime = workMinutes * 60;
         statusLabel.innerText = "Work Focus";
         statusLabel.style.color = "var(--accent-color)";
-        startBtn.innerText = 'Start';
-        startBtn.style.backgroundColor = 'var(--main-color)';
-        updateDisplay();
     }
-
+    
+    startBtn.innerText = 'Start';
+    startBtn.style.backgroundColor = 'var(--main-color)';
     updateDisplay();
+}
+
+function resetTimer() {
+    clearInterval(timerId);
+    timerId = null;
+    isBreak = false;
+    timeLeft = workMinutes * 60;
+    totalTime = workMinutes * 60;
+    statusLabel.innerText = "Work Focus";
+    statusLabel.style.color = "var(--accent-color)";
+    startBtn.innerText = 'Start';
+    startBtn.style.backgroundColor = 'var(--main-color)';
+    updateDisplay();
+}
+
+updateDisplay();
 </script>
 
 </body>
