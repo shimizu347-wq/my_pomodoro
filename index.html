@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chic Pomodoro Crystal v2</title>
+    <title>Chic Pomodoro Crystal v3</title>
     <style>
         :root {
             --bg-color: #F8F3F1;
@@ -16,7 +16,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -28,125 +28,28 @@
             overflow: hidden;
         }
 
-        .container {
-            text-align: center;
-            width: 90%;
-            max-width: 360px;
-        }
-
-        h1 {
-            font-size: 1.1rem;
-            font-weight: 300;
-            letter-spacing: 0.2em;
-            color: var(--gold-color);
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-        }
-
-        .timer-card {
-            background: var(--card-bg);
-            padding: 2rem 1.5rem;
-            border-radius: 30px;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .presets {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 1.5rem;
-        }
-
+        .container { text-align: center; width: 90%; max-width: 360px; }
+        h1 { font-size: 1.1rem; font-weight: 300; letter-spacing: 0.2em; color: var(--gold-color); margin-bottom: 1.5rem; text-transform: uppercase; }
+        .timer-card { background: var(--card-bg); padding: 2rem 1.5rem; border-radius: 30px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .presets { display: flex; justify-content: center; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        
         .preset-btn {
-            padding: 6px 12px;
-            font-size: 0.75rem;
-            background-color: transparent;
-            color: var(--gold-color);
-            border: 1px solid var(--gold-color);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            padding: 6px 12px; font-size: 0.75rem; background-color: transparent;
+            color: var(--gold-color); border: 1px solid var(--gold-color); border-radius: 15px; cursor: pointer;
         }
+        .preset-btn.active { background-color: var(--gold-color); color: white; }
 
-        .preset-btn.active {
-            background-color: var(--gold-color);
-            color: white;
-        }
+        .status-label { font-size: 0.85rem; font-weight: bold; color: var(--accent-color); letter-spacing: 0.1em; margin-bottom: 0.2rem; height: 1.2rem; }
+        .display { font-size: 5rem; font-weight: 200; margin: 0.5rem 0 1.5rem 0; font-variant-numeric: tabular-nums; }
+        .controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 0.5rem; }
+        
+        button.main-btn { padding: 14px 28px; font-size: 0.9rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
+        .start { background-color: var(--main-color); color: white; min-width: 120px; box-shadow: 0 5px 15px rgba(212, 165, 165, 0.4); }
+        .reset { background-color: #F0F0F0; color: #999; }
+        .sound-test { margin-top: 15px; font-size: 0.7rem; color: var(--gold-color); background: none; border: none; text-decoration: underline; cursor: pointer; }
 
-        .status-label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            letter-spacing: 0.1em;
-            margin-bottom: 0.2rem;
-            height: 1.2rem;
-        }
-
-        .display {
-            font-size: 5rem;
-            font-weight: 200;
-            margin: 0.5rem 0 1.5rem 0;
-            font-variant-numeric: tabular-nums;
-            color: var(--text-color);
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 0.5rem;
-        }
-
-        button.main-btn {
-            padding: 14px 28px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .start {
-            background-color: var(--main-color);
-            color: white;
-            box-shadow: 0 5px 15px rgba(212, 165, 165, 0.4);
-            min-width: 120px;
-        }
-
-        .reset {
-            background-color: #F0F0F0;
-            color: #999;
-        }
-
-        .sound-test {
-            margin-top: 15px;
-            font-size: 0.7rem;
-            color: var(--gold-color);
-            text-decoration: underline;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .progress-bar-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background-color: #F0EAE8;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, var(--main-color), var(--accent-color));
-            transition: width 1s linear;
-        }
+        .progress-bar-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background-color: #F0EAE8; }
+        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--main-color), var(--accent-color)); transition: width 1s linear; }
     </style>
 </head>
 <body>
@@ -155,6 +58,7 @@
     <h1>Chic Pomodoro</h1>
     <div class="timer-card">
         <div class="presets">
+            <button class="preset-btn" onclick="setTimer(1, 1, this)">Test(1m)</button>
             <button class="preset-btn" onclick="setTimer(15, 3, this)">15min</button>
             <button class="preset-btn active" onclick="setTimer(25, 5, this)">25min</button>
             <button class="preset-btn" onclick="setTimer(50, 10, this)">50min</button>
@@ -164,11 +68,11 @@
         <div class="display" id="display">25:00</div>
         
         <div class="controls">
-            <button class="main-btn start" id="startBtn" onclick="toggleTimer()">Start</button>
+            <button class="main-btn start" id="startBtn" onclick="handleStartClick()">Start</button>
             <button class="main-btn reset" onclick="resetTimer()">Reset</button>
         </div>
 
-        <button class="sound-test" onclick="initAndPlayTest()">♪ Sound Test</button>
+        <button class="sound-test" onclick="playCrystalSound()">♪ Sound Test</button>
 
         <div class="progress-bar-container">
             <div class="progress-bar" id="progressBar"></div>
@@ -177,82 +81,64 @@
 </div>
 
 <script>
+    /* --- グローバル変数 --- */
     let audioCtx = null;
-
-    // 音源の初期化と再生
-    function playCrystalSound() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-        const now = audioCtx.currentTime;
-
-        notes.forEach((freq, i) => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.1);
-            
-            gain.gain.setValueAtTime(0.4, now + i * 0.1); // 音量を少し上げました
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.1 + 1.5);
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            osc.start(now + i * 0.1);
-            osc.stop(now + i * 0.1 + 1.5);
-        });
-    }
-
-    // テストボタン用
-    function initAndPlayTest() {
-        playCrystalSound();
-    }
-
-    let workMinutes = 25;
-    let breakMinutes = 5;
-    let timeLeft = workMinutes * 60;
-    let totalTime = workMinutes * 60;
-    let timerId = null;
-    let isBreak = false;
+    let wakeLock = null;
+    let workMinutes = 25, breakMinutes = 5;
+    let timeLeft = workMinutes * 60, totalTime = workMinutes * 60;
+    let timerId = null, isBreak = false;
 
     const display = document.getElementById('display');
     const startBtn = document.getElementById('startBtn');
     const progressBar = document.getElementById('progressBar');
     const statusLabel = document.getElementById('statusLabel');
 
+    /* --- スリープ防止 (Wake Lock) --- */
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) { console.error(`${err.name}: ${err.message}`); }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock !== null) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+    }
+
+    /* --- 音声処理 --- */
+    function playCrystalSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        const now = audioCtx.currentTime;
+        notes.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.1);
+            gain.gain.setValueAtTime(0.5, now + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.1 + 1.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 1.5);
+        });
+    }
+
+    /* --- タイマー制御 --- */
     function updateDisplay() {
         const mins = Math.floor(timeLeft / 60);
         const secs = timeLeft % 60;
         display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        const progressPercent = (timeLeft / totalTime) * 100;
-        progressBar.style.width = `${progressPercent}%`;
+        progressBar.style.width = `${(timeLeft / totalTime) * 100}%`;
     }
 
-    function setTimer(w, b, btn) {
-        if (timerId) {
-            if(!confirm("進行中のタイマーをリセットしますか？")) return;
-            resetTimer();
-        }
-        workMinutes = w;
-        breakMinutes = b;
-        isBreak = false;
-        timeLeft = workMinutes * 60;
-        totalTime = workMinutes * 60;
-        statusLabel.innerText = "Work Focus";
-        statusLabel.style.color = "var(--accent-color)";
-        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updateDisplay();
-    }
-
-    function toggleTimer() {
-        // Startボタンを押した瞬間に音響機能をONにする
+    async function handleStartClick() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -261,7 +147,9 @@
             timerId = null;
             startBtn.innerText = 'Resume';
             startBtn.style.backgroundColor = 'var(--main-color)';
+            releaseWakeLock();
         } else {
+            await requestWakeLock();
             startBtn.innerText = 'Pause';
             startBtn.style.backgroundColor = 'var(--accent-color)';
             timerId = setInterval(() => {
@@ -275,24 +163,20 @@
     function completeCycle() {
         clearInterval(timerId);
         timerId = null;
-        
-        // 先に音を鳴らす
         playCrystalSound();
+        releaseWakeLock();
 
-        // 0.5秒待ってから通知を出す（音が消されないように）
         setTimeout(() => {
             if (!isBreak) {
                 alert("Work finished! クリスタルな休憩を。");
                 isBreak = true;
-                timeLeft = breakMinutes * 60;
-                totalTime = breakMinutes * 60;
+                timeLeft = totalTime = breakMinutes * 60;
                 statusLabel.innerText = "Short Break";
                 statusLabel.style.color = "#88A0A8";
             } else {
                 alert("Break finished! 作業を再開しましょう。");
                 isBreak = false;
-                timeLeft = workMinutes * 60;
-                totalTime = workMinutes * 60;
+                timeLeft = totalTime = workMinutes * 60;
                 statusLabel.innerText = "Work Focus";
                 statusLabel.style.color = "var(--accent-color)";
             }
@@ -302,18 +186,37 @@
         }, 500);
     }
 
+    function setTimer(w, b, btn) {
+        if (timerId) { resetTimer(); }
+        workMinutes = w; breakMinutes = b;
+        isBreak = false;
+        timeLeft = totalTime = workMinutes * 60;
+        statusLabel.innerText = "Work Focus";
+        statusLabel.style.color = "var(--accent-color)";
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateDisplay();
+    }
+
     function resetTimer() {
         clearInterval(timerId);
         timerId = null;
         isBreak = false;
-        timeLeft = workMinutes * 60;
-        totalTime = workMinutes * 60;
+        timeLeft = totalTime = workMinutes * 60;
         statusLabel.innerText = "Work Focus";
         statusLabel.style.color = "var(--accent-color)";
         startBtn.innerText = 'Start';
         startBtn.style.backgroundColor = 'var(--main-color)';
+        releaseWakeLock();
         updateDisplay();
     }
+
+    // 画面が再度表示されたときにスリープ防止を再有効化
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            await requestWakeLock();
+        }
+    });
 
     updateDisplay();
 </script>
